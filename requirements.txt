@@ -1,0 +1,6 @@
+pdfminer
+scikit-image
+Spire.Doc
+Spire.Pdf
+tqdm
+parmap
