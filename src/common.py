@@ -20,14 +20,16 @@ class DB:
     def add_reference(self, reference):
         self.references[reference.id] = reference
 
-    def add_connection(self, student_id_a, student_id_b, mse, ssim, psnr):
+    def add_connection(self, student_id_a, student_id_b, mse, ssim, psnr, reference=False):
+        # If reference is True, the connection is between a student and a reference
         if student_id_a not in self.connections:
             self.connections[student_id_a] = []
         self.connections[student_id_a].append((student_id_b, mse, ssim, psnr))
 
-        if student_id_b not in self.connections:
-            self.connections[student_id_b] = []
-        self.connections[student_id_b].append((student_id_a, mse, ssim, psnr))
+        if not reference:
+            if student_id_b not in self.connections:
+                self.connections[student_id_b] = []
+            self.connections[student_id_b].append((student_id_a, mse, ssim, psnr))
     
     def get_student(self, student_id):
         return self.students[student_id]
@@ -90,16 +92,6 @@ class Reference(Student):
 
     def add_etc_dir(self, etc_name):
         self.etc_names.append(etc_name)
-
-def init_database():
-    global database
-    database = DB()
-    return database
-
-def get_database():
-    global database
-    return database
-
 
 # project_root is a directory where the directory containing this file is located
 project_root = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))

@@ -35,7 +35,7 @@ import config
 from tools.process_image import extract_image, compare_image_submission, compare_image_reference
 
 args = config.get_config()
-database = common.init_database()
+database = common.DB()
 
 def main():
     # Parse check_filetype into a list
@@ -44,7 +44,8 @@ def main():
     # Check supported file types
     assert len(check_filetype) > 0, 'check_filetype must be specified'
     assert check_filetype not in common.supported_types, f'Supported file types are {common.supported_types}. \
-        Ask to Jangsoo Park(@jangsoopark), Jiwoon Lee(@metr0jw)'
+        Ask to Jangsoo Park(@jangsoopark), Jiwoon Lee(@metr0jw) \
+        or add the file type to supported_doc_types, supported_code_types, supported_etc_types in common.py.'
 
     # Select supported file types, ex) ['docx', 'pdf', 'c', 'cpp', 'h', 'hpp', 'py', 'java', ...]
     check_doc_types = [t for t in check_filetype if t in common.supported_doc_types]     # ['docx', 'pdf']
@@ -132,19 +133,34 @@ def main():
         print('Comparing images... (Submission and Submission)')
         if args.p > 1:
             compare_image_partial = partial(compare_image_submission, sub_image_dirs=sub_image_dirs)
-            parmap.map(compare_image_partial, sub_image_dirs, pm_pbar=True, pm_processes=args.p)
+            compare_result = parmap.map(compare_image_partial, sub_image_dirs, pm_pbar=True, pm_processes=args.p)
         else:
+            compare_result = []
             for s0 in sub_image_dirs:
                 for s1 in sub_image_dirs:
-                    compare_image_submission(s0, s1)
+                    compare_result.append(compare_image_submission(s0, s1))
+        
+        # Connect to database
+        for result in compare_result:
+            if result is not None:
+                database.add_connection(*result)
 
         print('Comparing images... (Submission and Reference)')
         if args.p > 1:
-            compare_image_partial = partial(compare_image_reference, ref_image_dirs=sub_image_dirs)
-            parmap.map(compare_image_partial, ref_image_dirs, pm_pbar=True, pm_processes=args.p)
+            compare_image_partial = partial(compare_image_reference, ref_image_dirs=ref_image_dirs)
+            compare_result = parmap.map(compare_image_partial, ref_image_dirs, pm_pbar=True, pm_processes=args.p)
         else:
-            for r in ref_image_dirs:
-                compare_image_reference(r, sub_image_dirs)
+            compare_result = []
+            for s in sub_image_dirs:
+                for r in ref_image_dirs:
+                    compare_result.append(compare_image_reference(s, r))
+
+        # Connect to database
+        for result in compare_result:
+            if result is not None:
+                database.add_connection(*result, reference=True)
+
+        # TODO: Fix database.add_connection adding duplicate values, student_id as relative path
 
         # Save results to database
         # image_result_sub contains
@@ -152,7 +168,6 @@ def main():
         # image_result_ref contains
         # [student_id, reference_ids, mse_values, ssim_values, psnr_values]
             
-
     # If check code
     if len(check_code_types) > 0:
         print('Checking code files...')
