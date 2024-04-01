@@ -1,5 +1,5 @@
 # Author: Jangsoo Park, Jiwoon Lee
-# Last Modified: 2024-03-30
+# Last Modified: 2024-04-01
 # Description: This script compares the submission images with the reference images and saves the result in the output directory.
 # Usage: python main.py --input-dir <input_dir> --reference-dir <reference_dir> --output-dir <output_dir> --check_filetype <check_filetype>
 # Example: python main.py --input-dir ./outputs --reference-dir ./reference --output-dir ./result --check_filetype pdf,cpp
@@ -10,18 +10,14 @@
 #   --check_filetype: Filetype to check
 # License: MIT License
 
-from skimage import transform
-from skimage import metrics
-from skimage import color
-from skimage import io
 import numpy as np
+import pandas as pd
 
 from multiprocessing import Pool
 from functools import partial
 from parmap import parmap
 from tqdm import tqdm
 
-import argparse
 import glob
 import sys
 import os
@@ -29,16 +25,10 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import common
-from tools.process_image import extract_image, compare_image
+import config
+from tools.process_image import extract_image, compare_image_submission, compare_image_reference
 
-parser = argparse.ArgumentParser(description='')
-parser.add_argument('--input-dir', dest='input_dir', type=str, default='submission', help='Directory containing submissions')
-parser.add_argument('--reference-dir', dest='reference_dir', type=str, default='reference', help='Directory containing reference images')
-parser.add_argument('--output-dir', dest='output_dir', type=str, default='out', help='Directory to save the result')
-parser.add_argument('--check_filetype', dest='check_filetype', type=str, default='pdf,cpp', help='Filetype to check')
-parser.add_argument('--p', dest='p', type=int, default=1, help='Number of processes')
-
-args = parser.parse_args()
+args = config.get_config()
 
 def main():
     # Parse check_filetype into a list
@@ -46,7 +36,8 @@ def main():
 
     # Check supported file types
     assert len(check_filetype) > 0, 'check_filetype must be specified'
-    assert check_filetype not in common.supported_types, f'Supported file types are {common.supported_types}. Ask to Jangsoo Park(@jangsoopark), Jiwoon Lee(@metr0jw)'
+    assert check_filetype not in common.supported_types, f'Supported file types are {common.supported_types}. \
+        Ask to Jangsoo Park(@jangsoopark), Jiwoon Lee(@metr0jw)'
 
     # Select supported file types, ex) ['docx', 'pdf', 'c', 'cpp', 'h', 'hpp', 'py', 'java', ...]
     check_doc_types = [t for t in check_filetype if t in common.supported_doc_types]     # ['docx', 'pdf']
@@ -54,40 +45,59 @@ def main():
     check_etc_types = [t for t in check_filetype if t in common.supported_etc_types]     # ['txt', 'csv', ...]
 
     # Set threshold values
-    shape_threshold = 5
-    error_threshold = 0.01
+    shape_threshold = args.shape_threshold
+    error_threshold = args.error_threshold
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # TODO: functionize parse_filenames
-    # Get reference DB file names
-    ref_doc_names = []  # ['student_id1/doc1.docx', 'student_id2/doc2.pdf', ...] in relative path
-    ref_code_names = [] # ['student_id1/code1.c', 'student_id2/code2.cpp', ...] in relative path
-    ref_etc_names = []  # ['student_id1/etc1.txt', 'student_id2/etc2.csv', ...] in relative path
-    for root, dirs, files in os.walk(args.reference_dir):
-        if len(files) > 0:
-            # Append only check_filetype files
-            ref_doc_names.extend([os.path.join(root, f) for f in files if f.endswith(tuple(check_doc_types))])
-            ref_code_names.extend([os.path.join(root, f) for f in files if f.endswith(tuple(check_code_types))])
-            ref_etc_names.extend([os.path.join(root, f) for f in files if f.endswith(tuple(check_etc_types))])
+    database = common.DB()  # Initialize database
+    submission_count = 0    # Initialize submission count
+    reference_count = 0     # Initialize reference count
 
-    # Get submission 
-    sub_doc_names = []  # ['ref_student_id1/doc1.docx', 'ref_student_id2/doc2.pdf', ...] in relative path
-    sub_code_names = [] # ['ref_student_id1/code1.c', 'ref_student_id2/code2.cpp', ...] in relative path
-    sub_etc_names = []  # ['ref_student_id1/etc1.txt', 'ref_student_id2/etc2.csv', ...] in relative path
+    # TODO: functionize parse_filenames
     for root, dirs, files in os.walk(args.input_dir):
         if len(files) > 0:
-            # Append only check_filetype files
-            sub_doc_names.extend([os.path.join(root, f) for f in files if f.endswith(tuple(check_doc_types))])
-            sub_code_names.extend([os.path.join(root, f) for f in files if f.endswith(tuple(check_code_types))])
-            sub_etc_names.extend([os.path.join(root, f) for f in files if f.endswith(tuple(check_etc_types))])
+            submission_count += len(files)
+            # Path name as student_id
+            student_id = os.path.basename(root)
+            student = common.Student()
+            student.set_id(student_id)
+            for f in files:
+                if f.endswith(tuple(check_doc_types)):
+                    student.add_doc_dir(os.path.join(root, f))
+                elif f.endswith(tuple(check_code_types)):
+                    student.add_code_dir(os.path.join(root, f))
+                elif f.endswith(tuple(check_etc_types)):
+                    student.add_etc_dir(os.path.join(root, f))
 
-    print(f'Num reference files: {len(ref_doc_names) + len(ref_code_names) + len(ref_etc_names)}')
-    print(f'Num submissions: {len(sub_doc_names) + len(sub_code_names) + len(sub_etc_names)}')
+            database.add_student(student)
+
+    for root, dirs, files in os.walk(args.reference_dir):
+        if len(files) > 0:
+            reference_count += len(files)
+            # Path name as student_id
+            reference_id = os.path.basename(root)
+            reference = common.Reference()
+            reference.set_id(reference_id)
+            for f in files:
+                if f.endswith(tuple(check_doc_types)):
+                    reference.add_doc_dir(os.path.join(root, f))
+                elif f.endswith(tuple(check_code_types)):
+                    reference.add_code_dir(os.path.join(root, f))
+                elif f.endswith(tuple(check_etc_types)):
+                    reference.add_etc_dir(os.path.join(root, f))
+
+            database.add_reference(reference)
+    # TODO_END
+
+    # Print information
+    print(f'Num submissions: {submission_count}')
+    print(f'References: {reference_count}')
     print(f'Filetype to check: {check_filetype}')
     print(f'I/O Directories: {args.input_dir}, {args.reference_dir}, {args.output_dir}')
     print(f'Error Threshold: {error_threshold}')
     print(f'Shape Threshold: {shape_threshold}')
 
+    # TODO: functionize compare_files
     # Execute
     # If check document
     if len(check_doc_types) > 0:
@@ -113,15 +123,24 @@ def main():
         print(f'Num reference images: {len(ref_image_dirs)}')
         print(f'Finished extracting images')
         
-        # Compare each submission with reference images
-        print('Comparing images...')
-        image_result = []
+        # Compare images
+        print('Comparing images... (Submission and Submission)')
+        image_result_sub = []
         if args.p > 1:
-            compare_image_partial = partial(compare_image, ref_image_dirs=ref_image_dirs)
-            image_result = parmap.map(compare_image_partial, sub_image_dirs, pm_pbar=True, pm_processes=args.p)
+            compare_image_partial = partial(compare_image_submission, ref_image_dirs=ref_image_dirs)
+            image_result_sub = parmap.map(compare_image_partial, sub_image_dirs, pm_pbar=True, pm_processes=args.p)
         else:
             for s in sub_image_dirs:
-                image_result.append(compare_image(s, ref_image_dirs))
+                image_result_sub.append(compare_image_submission(s, ref_image_dirs))
+
+        print('Comparing images... (Submission and Reference)')
+        image_result_ref = []
+        if args.p > 1:
+            compare_image_partial = partial(compare_image_reference, ref_image_dirs=sub_image_dirs)
+            image_result_ref = parmap.map(compare_image_partial, ref_image_dirs, pm_pbar=True, pm_processes=args.p)
+        else:
+            for r in ref_image_dirs:
+                image_result_ref.append(compare_image_reference(r, sub_image_dirs))
 
     # If check code
     if len(check_code_types) > 0:
@@ -133,7 +152,6 @@ def main():
         print('Checking etc files...')
         etc_result = []
         
-
 
 '''
 def main():

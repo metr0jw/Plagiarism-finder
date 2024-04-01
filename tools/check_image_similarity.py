@@ -1,3 +1,4 @@
+# Deprecated: This script is deprecated. Please use the script in tools/compare_images.py
 # MSE, SSIM, PSNR
 import os
 import numpy as np

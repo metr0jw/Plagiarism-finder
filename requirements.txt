@@ -4,3 +4,4 @@ Spire.Doc
 Spire.Pdf
 tqdm
 parmap
+copydetect==0.5.0
