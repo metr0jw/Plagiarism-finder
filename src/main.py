@@ -9,6 +9,12 @@
 #   --output-dir: Directory to save the result
 #   --check_filetype: Filetype to check
 # License: MIT License
+# Notice
+# This program compares predefined file types. If you want to compare other file types, please add the file type to supported_doc_types, supported_code_types, supported_etc_types in common.py.
+#
+# Disclaimer
+# This program is provided as is without any guarantees or warranty. In no event shall the authors be liable for any damages or losses arising from the use of this program.
+# This program does not guarantee the correctness of the comparison results. Please check the results manually.
 
 import numpy as np
 import pandas as pd
@@ -29,6 +35,7 @@ import config
 from tools.process_image import extract_image, compare_image_submission, compare_image_reference
 
 args = config.get_config()
+database = common.init_database()
 
 def main():
     # Parse check_filetype into a list
@@ -49,11 +56,11 @@ def main():
     error_threshold = args.error_threshold
     os.makedirs(args.output_dir, exist_ok=True)
 
-    database = common.DB()  # Initialize database
     submission_count = 0    # Initialize submission count
     reference_count = 0     # Initialize reference count
 
     # TODO: functionize parse_filenames
+    ### Parse filenames and add to database ###
     for root, dirs, files in os.walk(args.input_dir):
         if len(files) > 0:
             submission_count += len(files)
@@ -62,15 +69,13 @@ def main():
             student = common.Student()
             student.set_id(student_id)
             for f in files:
-                if f.endswith(tuple(check_doc_types)):
+                if f.endswith(tuple(check_doc_types)):          # Check if file extension is in check_doc_types
                     student.add_doc_dir(os.path.join(root, f))
-                elif f.endswith(tuple(check_code_types)):
+                elif f.endswith(tuple(check_code_types)):       # Check if file extension is in check_code_types
                     student.add_code_dir(os.path.join(root, f))
-                elif f.endswith(tuple(check_etc_types)):
+                elif f.endswith(tuple(check_etc_types)):        # Check if file extension is in check_etc_types
                     student.add_etc_dir(os.path.join(root, f))
-
             database.add_student(student)
-
     for root, dirs, files in os.walk(args.reference_dir):
         if len(files) > 0:
             reference_count += len(files)
@@ -85,9 +90,11 @@ def main():
                     reference.add_code_dir(os.path.join(root, f))
                 elif f.endswith(tuple(check_etc_types)):
                     reference.add_etc_dir(os.path.join(root, f))
-
             database.add_reference(reference)
     # TODO_END
+
+    # Get student and reference directories
+    sub_doc_names, ref_doc_names = database.get_documents()
 
     # Print information
     print(f'Num submissions: {submission_count}')
@@ -100,6 +107,7 @@ def main():
     # TODO: functionize compare_files
     # Execute
     # If check document
+    ### Extract images from document files ###
     if len(check_doc_types) > 0:
         print('Checking document files...')
         print('Extracting images...')
@@ -118,29 +126,32 @@ def main():
 
         # Remove ref_image_dirs from sub_image_dirs
         sub_image_dirs = [s for s in sub_image_dirs if s not in ref_image_dirs]
-
-        print(f'Num extracted images: {len(sub_image_dirs)}')
-        print(f'Num reference images: {len(ref_image_dirs)}')
         print(f'Finished extracting images')
         
-        # Compare images
+        ### Compare images ###
         print('Comparing images... (Submission and Submission)')
-        image_result_sub = []
         if args.p > 1:
-            compare_image_partial = partial(compare_image_submission, ref_image_dirs=ref_image_dirs)
-            image_result_sub = parmap.map(compare_image_partial, sub_image_dirs, pm_pbar=True, pm_processes=args.p)
+            compare_image_partial = partial(compare_image_submission, sub_image_dirs=sub_image_dirs)
+            parmap.map(compare_image_partial, sub_image_dirs, pm_pbar=True, pm_processes=args.p)
         else:
-            for s in sub_image_dirs:
-                image_result_sub.append(compare_image_submission(s, ref_image_dirs))
+            for s0 in sub_image_dirs:
+                for s1 in sub_image_dirs:
+                    compare_image_submission(s0, s1)
 
         print('Comparing images... (Submission and Reference)')
-        image_result_ref = []
         if args.p > 1:
             compare_image_partial = partial(compare_image_reference, ref_image_dirs=sub_image_dirs)
-            image_result_ref = parmap.map(compare_image_partial, ref_image_dirs, pm_pbar=True, pm_processes=args.p)
+            parmap.map(compare_image_partial, ref_image_dirs, pm_pbar=True, pm_processes=args.p)
         else:
             for r in ref_image_dirs:
-                image_result_ref.append(compare_image_reference(r, sub_image_dirs))
+                compare_image_reference(r, sub_image_dirs)
+
+        # Save results to database
+        # image_result_sub contains
+        # [student_id_a, student_id_b, mse_values, ssim_values, psnr_values]
+        # image_result_ref contains
+        # [student_id, reference_ids, mse_values, ssim_values, psnr_values]
+            
 
     # If check code
     if len(check_code_types) > 0:

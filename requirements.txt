@@ -1,7 +1,9 @@
 pdfminer
 scikit-image
-Spire.Doc
-Spire.Pdf
+pymupdf
 tqdm
 parmap
 copydetect==0.5.0
+pandas
+numpy
+pymupdf
