@@ -48,5 +48,5 @@ email = "jwlee@linux.com"
 ```
 
 ## Authors
-- **Jangsoo Park** - *Initial work* - [Jangsoo Park](github.com/jangsoopark), Department of Computer Engineering, Kwangwoon University
-- **Jiwoon Lee** - *Initial work* - [Jiwoon Lee](github.com/metr0jw), Department of Computer Engineering, Kwangwoon University
+- **Jangsoo Park** - *Initial work* - [Jangsoo Park](https://github.com/jangsoopark), Department of Computer Engineering, Kwangwoon University
+- **Jiwoon Lee** - *Initial work* - [Jiwoon Lee](https://github.com/metr0jw), Department of Computer Engineering, Kwangwoon University

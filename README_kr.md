@@ -48,5 +48,5 @@ email = "jwlee@linux.com"
 ```
 
 ## 저자
-- **박장수** - *초기 작업* - [박장수](github.com/jangsoopark), 광운대학교 컴퓨터공학과
-- **이지운** - *초기 작업* - [박장수](github.com/metr0jw), 광운대학교 컴퓨터공학과
+- **박장수** - *초기 작업* - [박장수](https://github.com/jangsoopark), 광운대학교 컴퓨터공학과
+- **이지운** - *초기 작업* - [이지운](https://github.com/metr0jw), 광운대학교 컴퓨터공학과
