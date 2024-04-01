@@ -1,24 +1,27 @@
 # Plagiarism finder - Kwangwoon University
 ## Department of Computer Engineering
 
-## 프로그램 설명
-본 프로그램은 텍스트, 문서, 코드 파일을 입력받아 유사도를 분석하는 프로그램입니다.
-현재 지원하는 파일 형식은 다음과 같습니다.
+## 한국어 버전을 찾고 계신가요?
+[한국어 버전](README_kr.md)
 
-- 문서 파일
+## Description
+This program is a program that analyzes the similarity of text, document, and code files.
+The currently supported file formats are as follows.
+
+- Documents
 ```text
 docx,pdf
 ```
-- 코드 파일
+- Code
 ```text
 c, cpp, h, hpp, py, java, mat, m, cs, asm, js, v, vhd, vhdl, r
 ```
-- 텍스트 파일
+- Text
 ```text
 txt, csv, json, xml, html, css, yml, yaml
 ```
 
-## 파일 구조
+## File structure
 ```text
 src/
 ├── common.py
@@ -29,5 +32,7 @@ README.md
 requirements.txt
 ```
 
-## 사용법
+## How to use
 ```bash
+```
+
