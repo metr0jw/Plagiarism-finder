@@ -93,8 +93,8 @@ result/
 ## Contact
 만약 궁금한 점이 있으시거나 추가적인 도움이 필요하시다면, 아래 연락처로 연락해주세요.
 - 이메일: [jwlee@linux.com](mailto:jwlee@linux.com)
-- 이슈 트래커: [GitHub Issues](https://github.com/your-repo/issues)
-- 토론 포럼: [GitHub Discussions](https://github.com/your-repo/discussions)
+- 이슈 트래커: [GitHub Issues](https://github.com/metr0jw/Plagiarism-finder/issues)
+- 토론 포럼: [GitHub Discussions](https://github.com/metr0jw/Plagiarism-finder/discussions)
 
 ## 문의
 만약 궁금한 점이 있으시다면, 아래 이메일 주소로 연락해주세요.

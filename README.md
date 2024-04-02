@@ -92,8 +92,8 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 ## Contact
 If you have any questions or need further assistance, please contact us at the following:
 - Email: [jwlee@linux.com](mailto:jwlee@linux.com)
-- Issue Tracker: [GitHub Issues](https://github.com/your-repo/issues)
-- Discussion Forum: [GitHub Discussions](https://github.com/your-repo/discussions)
+- Issue Tracker: [GitHub Issues](https://github.com/metr0jw/Plagiarism-finder/issues)
+- Discussion Forum: [GitHub Discussions](https://github.com/metr0jw/Plagiarism-finder/discussions)
 
 ## Authors
 - **Jangsoo Park** - *Initial work* - [Jangsoo Park](https://github.com/jangsoopark), Department of Computer Engineering, Kwangwoon University
