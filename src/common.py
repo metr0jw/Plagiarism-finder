@@ -40,6 +40,9 @@ class DB:
     def get_connection(self, student_id):
         return self.connections[student_id]
     
+    def get_connections(self):
+        return self.connections
+    
     def get_documents(self):
         sub_doc_names = []
         ref_doc_names = []

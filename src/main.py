@@ -148,7 +148,7 @@ def main():
         print('Comparing images... (Submission and Reference)')
         if args.p > 1:
             compare_args = [(s, r) for s in sub_image_dirs for r in ref_image_dirs]
-            compare_result = parmap.map(compare_image_wrapper_ref, compare_args, pm_pbar=True, pm_processes=args.p)
+            compare_result = parmap.map(compare_image_wrapper, compare_args, pm_pbar=True, pm_processes=args.p)
         else:
             compare_result = []
             for s in tqdm(sub_image_dirs, desc='Comparing images... (Submission and Reference)'):
@@ -160,13 +160,15 @@ def main():
             if result is not None:
                 database.add_connection(*result, reference=True)
 
-        # TODO: Fix database.add_connection adding duplicate values, student_id as relative path
-
-        # Save results to database
-        # image_result_sub contains
-        # [student_id_a, student_id_b, mse_values, ssim_values, psnr_values]
-        # image_result_ref contains
-        # [student_id, reference_ids, mse_values, ssim_values, psnr_values]
+        # Save the result using pandas
+        buf = [[key, *value] for key, values in database.connections.items() for value in values]   # [['student_id_a', 'student_id_b', ['mse'], ['ssim'], ['psnr']], ...]
+        # Unpack ssim, psnr, mse
+        buf = [[*b[:2], *b[2][0], *b[3][0], *b[4][0]] for b in buf]    # [['student_id_a', 'student_id_b', 'mse_min', 'mse_max', 'mse_avg', ], ...]
+        df = pd.DataFrame(buf, columns=['student_id_a', 'student_id_b',
+                                        'mse_min', 'mse_max', 'mse_avg',
+                                        'ssim_min', 'ssim_max', 'ssim_avg',
+                                        'psnr_min', 'psnr_max', 'psnr_avg'])
+        df.to_csv(os.path.join(args.output_dir, 'result.csv'), index=False)
             
     # If check code
     if len(check_code_types) > 0:
