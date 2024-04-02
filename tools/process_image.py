@@ -52,15 +52,15 @@ def compare_image(submission_dir_a: str, submission_dir_b: str, reference: bool 
 
     mse_min = 1e9
     mse_max = 0
-    mse_avg = 0
+    mse_avg = []    # Harmonic mean
 
     ssim_min = 1e9
     ssim_max = 0
-    ssim_avg = 0
+    ssim_avg = []
 
     psnr_min = 1e9
     psnr_max = 0
-    psnr_avg = 0
+    psnr_avg = []
 
     # TODO: Check rotation, flip, other loss, etc.
     for img_name_a in images_a:
@@ -93,19 +93,20 @@ def compare_image(submission_dir_a: str, submission_dir_b: str, reference: bool 
 
             mse_min = min(mse_min, mse)
             mse_max = max(mse_max, mse)
-            mse_avg += mse
+            mse_avg.append(mse)
 
             ssim_min = min(ssim_min, ssim_value)
             ssim_max = max(ssim_max, ssim_value)
-            ssim_avg += ssim_value
+            ssim_avg.append(ssim_value)
 
             psnr_min = min(psnr_min, psnr_value)
             psnr_max = max(psnr_max, psnr_value)
-            psnr_avg += psnr_value
+            psnr_avg.append(psnr_value)
     
-    mse_avg /= len(images_a) * len(images_b)
-    ssim_avg /= len(images_a) * len(images_b)
-    psnr_avg /= len(images_a) * len(images_b)
+    # Use harmonic mean
+    mse_avg = len(mse_avg) / sum([1 / mse for mse in mse_avg])
+    ssim_avg = len(ssim_avg) / sum([1 / ssim for ssim in ssim_avg])
+    psnr_avg = len(psnr_avg) / sum([1 / psnr for psnr in psnr_avg])
 
     mse_values.append((mse_min, mse_max, mse_avg))
     ssim_values.append((ssim_min, ssim_max, ssim_avg))
