@@ -32,7 +32,55 @@ requirements.txt
 ```
 
 ## How to use
+1. (Optional) Create a virtual environment.
 ```bash
+python -m venv VIRTUAL_ENV_NAME
+source VIRTUAL_ENV_NAME/bin/activate
+```
+
+2. Install the required packages.
+```bash
+pip install -r requirements.txt
+```
+
+3. Place the files you want to compare (ex. source code, document, text) in the `submission` directory.
+```text
+submission/
+├── studentname/
+│   ├── code1.cpp
+│   ├── code2.cpp
+│   ├── report.docx
+│   ├── report.pdf
+├── couldbeanyname/
+│   ├── code1.cpp
+│   ├── code2.java
+│   ├── code3.py
+│   ├── report.pdf
+```
+
+4. (Optional) If you have assignments that previously submitted by students, place them in the `reference` directory.
+```text
+reference/
+├── prev_studentname/
+│   ├── code1.cpp
+│   ├── code2.cpp
+│   ├── report.docx
+│   ├── report.pdf
+├── prev_studentname2/
+│   ├── code1.cpp
+│   ├── code2.java
+│   ├── code3.py
+│   ├── report.pdf
+```
+5. Run the program.
+```bash
+python src/main.py
+```
+
+6. The results will be saved in the `result` directory.
+```text
+result/
+├── result.csv
 ```
 
 ## License

@@ -31,8 +31,57 @@ README.md
 requirements.txt
 ```
 
-## 사용법
+## 사용 방법
+1. (선택) 가상 환경을 생성합니다.
 ```bash
+python -m venv VIRTUAL_ENV_NAME
+source VIRTUAL_ENV_NAME/bin/activate
+```
+
+2. 필요한 패키지를 설치합니다.
+```bash
+pip install -r requirements.txt
+```
+
+3. 비교하고 싶은 파일(예: 소스 코드, 문서, 텍스트)을 `submission` 디렉토리에 넣습니다.
+```text
+submission/
+├── studentname/
+│   ├── code1.cpp
+│   ├── code2.cpp
+│   ├── report.docx
+│   ├── report.pdf
+├── couldbeanyname/
+│   ├── code1.cpp
+│   ├── code2.java
+│   ├── code3.py
+│   ├── report.pdf
+```
+
+4. (선택) 이전에 제출된 과제가 있다면, `reference` 디렉토리에 넣습니다.
+```text
+reference/
+├── prev_studentname/
+│   ├── code1.cpp
+│   ├── code2.cpp
+│   ├── report.docx
+│   ├── report.pdf
+├── prev_studentname2/
+│   ├── code1.cpp
+│   ├── code2.java
+│   ├── code3.py
+│   ├── report.pdf
+```
+
+5. 프로그램을 실행합니다.
+```bash
+python src/main.py
+```
+
+1. 결과는 `result` 디렉토리에 저장됩니다.
+```text
+result/
+├── result.csv
 ```
 
 ## 라이센스
