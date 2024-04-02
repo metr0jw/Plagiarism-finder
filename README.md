@@ -86,14 +86,14 @@ result/
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Welcome to contribute!
-If you want to contribute to this project, please fork this repository and create a pull request.
+## Contributions Welcome!
+Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests. If you have any suggestions for improvement or new features, please let us know.
 
 ## Contact
-If you have any questions, please contact me at the following email address.
-```python
-email = "jwlee@linux.com"
-```
+If you have any questions or need further assistance, please contact us at the following:
+- Email: [jwlee@linux.com](mailto:jwlee@linux.com)
+- Issue Tracker: [GitHub Issues](https://github.com/your-repo/issues)
+- Discussion Forum: [GitHub Discussions](https://github.com/your-repo/discussions)
 
 ## Authors
 - **Jangsoo Park** - *Initial work* - [Jangsoo Park](https://github.com/jangsoopark), Department of Computer Engineering, Kwangwoon University

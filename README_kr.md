@@ -88,7 +88,13 @@ result/
 이 프로젝트는 MIT 라이센스를 따릅니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 
 ## 기여를 환영합니다!
-이 프로젝트에 기여하고 싶으시다면, 이 저장소를 fork하고 pull request를 생성해주세요.
+기여를 환영합니다! 이슈, 기능 요청 또는 풀 리퀘스트를 제출해주세요. 개선 사항이나 새로운 기능에 대한 제안이 있으면 알려주세요.
+
+## Contact
+만약 궁금한 점이 있으시거나 추가적인 도움이 필요하시다면, 아래 연락처로 연락해주세요.
+- 이메일: [jwlee@linux.com](mailto:jwlee@linux.com)
+- 이슈 트래커: [GitHub Issues](https://github.com/your-repo/issues)
+- 토론 포럼: [GitHub Discussions](https://github.com/your-repo/discussions)
 
 ## 문의
 만약 궁금한 점이 있으시다면, 아래 이메일 주소로 연락해주세요.
