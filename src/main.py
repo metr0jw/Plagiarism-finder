@@ -32,8 +32,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import common
 import config
-from tools.process_image import extract_image, compare_image_submission, compare_image_reference, \
-    compare_image_submission_wrapper, compare_image_reference_wrapper
+from tools.process_image import extract_image, compare_image, compare_image_wrapper, compare_image_wrapper_ref
 
 args = config.get_config()
 database = common.DB()
@@ -131,14 +130,15 @@ def main():
         
         ### Compare images ###
         print('Comparing images... (Submission and Submission)')
+
         if args.p > 1:
-            compare_args = [(s0, s1) for s0 in sub_image_dirs for s1 in sub_image_dirs]
-            compare_result = parmap.map(compare_image_submission_wrapper, compare_args, pm_pbar=True, pm_processes=args.p)
+            compare_args = [(s0, s1) for i, s0 in enumerate(sub_image_dirs) for s1 in sub_image_dirs[i+1:]]
+            compare_result = parmap.map(compare_image_wrapper, compare_args, pm_pbar=True, pm_processes=args.p)
         else:
             compare_result = []
-            for s0 in tqdm(sub_image_dirs, desc='Comparing images... (Submission and Submission)'):
-                for s1 in sub_image_dirs:
-                    compare_result.append(compare_image_submission(s0, s1))
+            for i, s0 in enumerate(tqdm(sub_image_dirs, desc='Comparing images... (Submission and Submission)')):
+                for s1 in sub_image_dirs[i+1:]:
+                    compare_result.append(compare_image(s0, s1))
         
         # Connect to database
         for result in compare_result:
@@ -148,12 +148,12 @@ def main():
         print('Comparing images... (Submission and Reference)')
         if args.p > 1:
             compare_args = [(s, r) for s in sub_image_dirs for r in ref_image_dirs]
-            compare_result = parmap.map(compare_image_reference_wrapper, compare_args, pm_pbar=True, pm_processes=args.p)
+            compare_result = parmap.map(compare_image_wrapper_ref, compare_args, pm_pbar=True, pm_processes=args.p)
         else:
             compare_result = []
             for s in tqdm(sub_image_dirs, desc='Comparing images... (Submission and Reference)'):
                 for r in ref_image_dirs:
-                    compare_result.append(compare_image_reference(s, r))
+                    compare_result.append(compare_image(s, r, reference=True))
 
         # Connect to database
         for result in compare_result:

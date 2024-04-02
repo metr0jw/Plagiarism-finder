@@ -16,13 +16,13 @@ from tqdm import tqdm
 
 from src.common import Student, Reference
 
-def compare_image_submission_wrapper(args):
-    return compare_image_submission(*args)
+def compare_image_wrapper(args):
+    return compare_image(*args)
 
-def compare_image_reference_wrapper(args):
-    return compare_image_reference(*args)
+def compare_image_wrapper_ref(args):
+    return compare_image(*args, reference=True)
 
-def compare_image_submission(submission_dir_a: str, submission_dir_b: str):
+def compare_image(submission_dir_a: str, submission_dir_b: str, reference: bool = False):
     '''
     Compare two images from two different directories.
     Args:
@@ -30,7 +30,7 @@ def compare_image_submission(submission_dir_a: str, submission_dir_b: str):
         submission_dir_b: Directory of the second student's image
     '''
     # Check if the directories are the same
-    if submission_dir_a == submission_dir_b:
+    if not reference and (submission_dir_a == submission_dir_b):
         return
     
     # Load image and reference image
@@ -65,9 +65,11 @@ def compare_image_submission(submission_dir_a: str, submission_dir_b: str):
     # TODO: Check rotation, flip, other loss, etc.
     for img_name_a in images_a:
         for img_name_b in images_b:
+            # Load paths
             image_path_a = os.path.join(submission_dir_a, img_name_a)
             image_path_b = os.path.join(submission_dir_b, img_name_b)
 
+            # Load the images
             image_a = skio.imread(image_path_a)
             image_b = skio.imread(image_path_b)
 
@@ -110,84 +112,6 @@ def compare_image_submission(submission_dir_a: str, submission_dir_b: str):
     psnr_values.append((psnr_min, psnr_max, psnr_avg))
 
     return student_id_a, student_id_b, mse_values, ssim_values, psnr_values
-
-
-def compare_image_reference(submission_dir: str, reference_dir: str):
-    '''
-    Compare an image from a student's directory with multiple reference images.
-    Args:
-        submission_dir: Directory of the student's image
-        reference_dir: Directory of the reference images
-    '''
-    # Load image and reference image
-    # Load image and reference image
-    student_id = os.path.basename(submission_dir)
-    reference_id = os.path.basename(reference_dir)
-
-    # Load list of images
-    images_a = os.listdir(submission_dir)
-    images_b = os.listdir(reference_dir)
-
-    # Return if the number of images is 0
-    if len(images_a) == 0 or len(images_b) == 0:
-        return
-
-    # Compare each image
-    mse_values = []
-    ssim_values = []
-    psnr_values = []
-
-    mse_min = 1e9
-    mse_max = 0
-
-    ssim_min = 1e9
-    ssim_max = 0
-
-    psnr_min = 1e9
-    psnr_max = 0
-
-    # TODO: Check rotation, flip, other loss, etc.
-    for img_name_a in images_a:
-        for img_name_b in images_b:
-            image_path_a = os.path.join(submission_dir, img_name_a)
-            image_path_b = os.path.join(reference_dir, img_name_b)
-
-            image_a = skio.imread(image_path_a)
-            image_b = skio.imread(image_path_b)
-
-            # Zero pad if the images are different sizes
-            if image_a.shape != image_b.shape:
-                pad_x = max(image_a.shape[0], image_b.shape[0])
-                pad_y = max(image_a.shape[1], image_b.shape[1])
-                image_a = np.pad(image_a, ((0, pad_x - image_a.shape[0]), (0, pad_y - image_a.shape[1]), (0, 0)), mode='constant')
-                image_b = np.pad(image_b, ((0, pad_x - image_b.shape[0]), (0, pad_y - image_b.shape[1]), (0, 0)), mode='constant')
-            
-            # Remove alpha channel if it exists
-            if image_a.shape[2] == 4:
-                image_a = image_a[:, :, :3]
-            if image_b.shape[2] == 4:
-                image_b = image_b[:, :, :3]
-
-            # Compare the images
-            mse = np.mean((image_a - image_b) ** 2)
-            ssim_value = ssim(image_a, image_b, multichannel=True, win_size=11, channel_axis=2)
-            psnr_value = psnr(image_a, image_b)
-
-            mse_min = min(mse_min, mse)
-            mse_max = max(mse_max, mse)
-
-            ssim_min = min(ssim_min, ssim_value)
-            ssim_max = max(ssim_max, ssim_value)
-
-            psnr_min = min(psnr_min, psnr_value)
-            psnr_max = max(psnr_max, psnr_value)
-    
-    mse_values.append((mse_min, mse_max))
-    ssim_values.append((ssim_min, ssim_max))
-    psnr_values.append((psnr_min, psnr_max))
-
-    return student_id, reference_id, mse_values, ssim_values, psnr_values
-
 
 def extract_image(doc_path: str, is_reference: bool = False):
     # Check if docx or pdf
