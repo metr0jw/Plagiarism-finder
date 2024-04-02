@@ -32,7 +32,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import common
 import config
-from tools.process_image import extract_image, compare_image_submission, compare_image_reference
+from tools.process_image import extract_image, compare_image_submission, compare_image_reference, \
+    compare_image_submission_wrapper, compare_image_reference_wrapper
 
 args = config.get_config()
 database = common.DB()
@@ -116,11 +117,10 @@ def main():
             parmap.map(extract_image, sub_doc_names, pm_pbar=True, pm_processes=args.p)
             parmap.map(extract_image, ref_doc_names, pm_pbar=True, pm_processes=args.p, is_reference=True)
         else:
-            for s in sub_doc_names:
+            for s in tqdm(sub_doc_names, desc='Extracting images... (Submission)'):
                 extract_image(s)
-            for r in ref_doc_names:
+            for r in tqdm(ref_doc_names, desc='Extracting images... (Reference)'):
                 extract_image(r, is_reference=True)
-        
         # Get directoreis in buffer
         sub_image_dirs = glob.glob(os.path.join(common.buffer_dir, '*'))        # ['student_id1', 'student_id2', ...] in absolute path
         ref_image_dirs = glob.glob(os.path.join(common.buffer_dir, 'ref_*'))    # ['ref_student_id1', 'ref_student_id2', ...] in absolute path
@@ -132,11 +132,11 @@ def main():
         ### Compare images ###
         print('Comparing images... (Submission and Submission)')
         if args.p > 1:
-            compare_image_partial = partial(compare_image_submission, sub_image_dirs=sub_image_dirs)
-            compare_result = parmap.map(compare_image_partial, sub_image_dirs, pm_pbar=True, pm_processes=args.p)
+            compare_args = [(s0, s1) for s0 in sub_image_dirs for s1 in sub_image_dirs]
+            compare_result = parmap.map(compare_image_submission_wrapper, compare_args, pm_pbar=True, pm_processes=args.p)
         else:
             compare_result = []
-            for s0 in sub_image_dirs:
+            for s0 in tqdm(sub_image_dirs, desc='Comparing images... (Submission and Submission)'):
                 for s1 in sub_image_dirs:
                     compare_result.append(compare_image_submission(s0, s1))
         
@@ -147,11 +147,11 @@ def main():
 
         print('Comparing images... (Submission and Reference)')
         if args.p > 1:
-            compare_image_partial = partial(compare_image_reference, ref_image_dirs=ref_image_dirs)
-            compare_result = parmap.map(compare_image_partial, ref_image_dirs, pm_pbar=True, pm_processes=args.p)
+            compare_args = [(s, r) for s in sub_image_dirs for r in ref_image_dirs]
+            compare_result = parmap.map(compare_image_reference_wrapper, compare_args, pm_pbar=True, pm_processes=args.p)
         else:
             compare_result = []
-            for s in sub_image_dirs:
+            for s in tqdm(sub_image_dirs, desc='Comparing images... (Submission and Reference)'):
                 for r in ref_image_dirs:
                     compare_result.append(compare_image_reference(s, r))
 
