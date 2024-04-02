@@ -78,7 +78,7 @@ reference/
 python src/main.py
 ```
 
-1. 결과는 `result` 디렉토리에 저장됩니다.
+6. 결과는 `result` 디렉토리에 저장됩니다.
 ```text
 result/
 ├── result.csv
