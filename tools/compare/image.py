@@ -1,3 +1,16 @@
+# Path: tools/compare/image.py
+# Author: Jangsoo Park, Jiwoon Lee
+# Last Modified: 2024-04-02
+# Description: This script extracts images from the submission and reference documents and compares them.
+# License: MIT License
+#
+# Disclaimer
+# This program is provided as is without any guarantees or warranty. In no event shall the authors be liable for any damages or losses arising from the use of this program.
+# This program does not guarantee the correctness of the comparison results. Please check the results manually.
+#
+# TODO: Seperate the docx to pdf conversion, image extraction, and image comparison functions
+#
+
 import io
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

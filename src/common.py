@@ -1,3 +1,13 @@
+# Path: src/common.py
+# Author: Jangsoo Park, Jiwoon Lee
+# Last Modified: 2024-04-02
+# Description: This script includes the common classes and functions used in the comparison of the submission images with the reference images.
+# License: MIT License
+#
+# Disclaimer
+# This program is provided as is without any guarantees or warranty. In no event shall the authors be liable for any damages or losses arising from the use of this program.
+# This program does not guarantee the correctness of the comparison results. Please check the results manually.
+
 import os
 
 class Similarity:

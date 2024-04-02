@@ -24,9 +24,16 @@ txt, csv, json, xml, html, css, yml, yaml
 ```text
 src/
 ├── common.py
+├── config.py
 ├── main.py
 tools/
-├── extract_images_from_doc.py
+├── compare/
+│   ├── code.py
+│   ├── image.py
+│   ├── text.py
+├── extract/
+│   ├── parse_files.py
+├── transform.py
 README.md
 requirements.txt
 ```

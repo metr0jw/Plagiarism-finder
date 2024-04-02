@@ -1,5 +1,6 @@
+# Path: src/main.py
 # Author: Jangsoo Park, Jiwoon Lee
-# Last Modified: 2024-04-01
+# Last Modified: 2024-04-02
 # Description: This script compares the submission images with the reference images and saves the result in the output directory.
 # Usage: python main.py --input-dir <input_dir> --reference-dir <reference_dir> --output-dir <output_dir> --check_filetype <check_filetype>
 # Example: python main.py --input-dir ./outputs --reference-dir ./reference --output-dir ./result --check_filetype pdf,cpp
@@ -32,7 +33,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import common
 import config
-from tools.process_image import extract_image, compare_image, compare_image_wrapper, compare_image_wrapper_ref
+from tools.compare.image import extract_image, compare_image, compare_image_wrapper, compare_image_wrapper_ref
 
 args = config.get_config()
 database = common.DB()
@@ -44,8 +45,8 @@ def main():
     # Check supported file types
     assert len(check_filetype) > 0, 'check_filetype must be specified'
     assert check_filetype not in common.supported_types, f'Supported file types are {common.supported_types}. \
-        Ask to Jangsoo Park(@jangsoopark), Jiwoon Lee(@metr0jw) \
-        or add the file type to supported_doc_types, supported_code_types, supported_etc_types in common.py.'
+        Check github.com/metr0jw/Plagiarism-finder to ask for support \
+        or add the file type to supported_doc_types, supported_code_types, supported_etc_types in src/common.py.'
 
     # Select supported file types, ex) ['docx', 'pdf', 'c', 'cpp', 'h', 'hpp', 'py', 'java', ...]
     check_doc_types = [t for t in check_filetype if t in common.supported_doc_types]     # ['docx', 'pdf']
@@ -108,8 +109,8 @@ def main():
     # TODO: functionize compare_files
     # Execute
     # If check document
-    ### Extract images from document files ###
     if len(check_doc_types) > 0:
+        ### Extract images from document files ###
         print('Checking document files...')
         print('Extracting images...')
         if args.p > 1:
@@ -170,12 +171,17 @@ def main():
                                         'psnr_min', 'psnr_max', 'psnr_avg'])
         df.to_csv(os.path.join(args.output_dir, 'result.csv'), index=False)
             
+        ### Compare texts in document files ###
+
+    
     # If check code
+    ### Compare code files ###
     if len(check_code_types) > 0:
         print('Checking code files...')
         code_result = []
     
     # If check etc
+    ### Compare etc files ###
     if len(check_etc_types) > 0:
         print('Checking etc files...')
         etc_result = []
