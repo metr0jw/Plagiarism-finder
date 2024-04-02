@@ -83,6 +83,10 @@ result/
 ├── result.csv
 ```
 
+## Note
+- The program is currently under development and may not work properly.
+- This program is intended to be used as a tool to assist in the detection of plagiarism. It is not a substitute for human judgment, and it is not a guarantee of plagiarism. It is the responsibility of the user to verify the results and determine whether plagiarism has occurred. The authors of this program are not responsible for any consequences that may arise from the use of this program.
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
