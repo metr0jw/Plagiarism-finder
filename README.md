@@ -7,15 +7,15 @@
 This program is a program that analyzes the similarity of text, document, and code files.
 The currently supported file formats are as follows.
 
-- Documents
+- Documents (Only image check is supported, under development)
 ```text
 docx,pdf
 ```
-- Code
+- Code (Under development)
 ```text
 c, cpp, h, hpp, py, java, mat, m, cs, asm, js, v, vhd, vhdl, r
 ```
-- Text
+- Text (Under development)
 ```text
 txt, csv, json, xml, html, css, yml, yaml
 ```

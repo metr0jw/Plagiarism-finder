@@ -11,11 +11,11 @@
 ```text
 docx,pdf
 ```
-- 코드 파일
+- 코드 파일 (구현 중)
 ```text
 c, cpp, h, hpp, py, java, mat, m, cs, asm, js, v, vhd, vhdl, r
 ```
-- 텍스트 파일
+- 텍스트 파일 (구현 중)
 ```text
 txt, csv, json, xml, html, css, yml, yaml
 ```
