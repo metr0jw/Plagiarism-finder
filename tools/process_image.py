@@ -16,6 +16,11 @@ from tqdm import tqdm
 
 from src.common import Student, Reference
 
+def compare_image_submission_wrapper(args):
+    return compare_image_submission(*args)
+
+def compare_image_reference_wrapper(args):
+    return compare_image_reference(*args)
 
 def compare_image_submission(submission_dir_a: str, submission_dir_b: str):
     '''
@@ -58,46 +63,47 @@ def compare_image_submission(submission_dir_a: str, submission_dir_b: str):
     psnr_avg = 0
 
     # TODO: Check rotation, flip, other loss, etc.
-    for image_a, image_b in zip(images_a, images_b):
-        image_path_a = os.path.join(submission_dir_a, image_a)
-        image_path_b = os.path.join(submission_dir_b, image_b)
+    for img_name_a in images_a:
+        for img_name_b in images_b:
+            image_path_a = os.path.join(submission_dir_a, img_name_a)
+            image_path_b = os.path.join(submission_dir_b, img_name_b)
 
-        image_a = skio.imread(image_path_a)
-        image_b = skio.imread(image_path_b)
+            image_a = skio.imread(image_path_a)
+            image_b = skio.imread(image_path_b)
 
-        # Zero pad if the images are different sizes
-        if image_a.shape != image_b.shape:
-            pad_x = max(image_a.shape[0], image_b.shape[0])
-            pad_y = max(image_a.shape[1], image_b.shape[1])
-            image_a = np.pad(image_a, ((0, pad_x - image_a.shape[0]), (0, pad_y - image_a.shape[1]), (0, 0)), mode='constant')
-            image_b = np.pad(image_b, ((0, pad_x - image_b.shape[0]), (0, pad_y - image_b.shape[1]), (0, 0)), mode='constant')
-        
-        # Remove alpha channel if it exists
-        if image_a.shape[2] == 4:
-            image_a = image_a[:, :, :3]
-        if image_b.shape[2] == 4:
-            image_b = image_b[:, :, :3]
+            # Zero pad if the images are different sizes
+            if image_a.shape != image_b.shape:
+                pad_x = max(image_a.shape[0], image_b.shape[0])
+                pad_y = max(image_a.shape[1], image_b.shape[1])
+                image_a = np.pad(image_a, ((0, pad_x - image_a.shape[0]), (0, pad_y - image_a.shape[1]), (0, 0)), mode='constant')
+                image_b = np.pad(image_b, ((0, pad_x - image_b.shape[0]), (0, pad_y - image_b.shape[1]), (0, 0)), mode='constant')
+            
+            # Remove alpha channel if it exists
+            if image_a.shape[2] == 4:
+                image_a = image_a[:, :, :3]
+            if image_b.shape[2] == 4:
+                image_b = image_b[:, :, :3]
 
-        # Compare the images
-        mse = np.mean((image_a - image_b) ** 2)
-        ssim_value = ssim(image_a, image_b, multichannel=True, win_size=11, channel_axis=2)
-        psnr_value = psnr(image_a, image_b)
+            # Compare the images
+            mse = np.mean((image_a - image_b) ** 2)
+            ssim_value = ssim(image_a, image_b, multichannel=True, win_size=11, channel_axis=2)
+            psnr_value = psnr(image_a, image_b)
 
-        mse_min = min(mse_min, mse)
-        mse_max = max(mse_max, mse)
-        mse_avg += mse
+            mse_min = min(mse_min, mse)
+            mse_max = max(mse_max, mse)
+            mse_avg += mse
 
-        ssim_min = min(ssim_min, ssim_value)
-        ssim_max = max(ssim_max, ssim_value)
-        ssim_avg += ssim_value        
+            ssim_min = min(ssim_min, ssim_value)
+            ssim_max = max(ssim_max, ssim_value)
+            ssim_avg += ssim_value
 
-        psnr_min = min(psnr_min, psnr_value)
-        psnr_max = max(psnr_max, psnr_value)
-        psnr_avg += psnr_value
-
-    mse_avg /= len(images_a)
-    ssim_avg /= len(images_a)
-    psnr_avg /= len(images_a)
+            psnr_min = min(psnr_min, psnr_value)
+            psnr_max = max(psnr_max, psnr_value)
+            psnr_avg += psnr_value
+    
+    mse_avg /= len(images_a) * len(images_b)
+    ssim_avg /= len(images_a) * len(images_b)
+    psnr_avg /= len(images_a) * len(images_b)
 
     mse_values.append((mse_min, mse_max, mse_avg))
     ssim_values.append((ssim_min, ssim_max, ssim_avg))
@@ -133,63 +139,54 @@ def compare_image_reference(submission_dir: str, reference_dir: str):
 
     mse_min = 1e9
     mse_max = 0
-    mse_avg = 0
 
     ssim_min = 1e9
     ssim_max = 0
-    ssim_avg = 0
 
     psnr_min = 1e9
     psnr_max = 0
-    psnr_avg = 0
 
     # TODO: Check rotation, flip, other loss, etc.
-    for image_a, image_b in zip(images_a, images_b):
-        image_path_a = os.path.join(submission_dir, image_a)
-        image_path_b = os.path.join(reference_dir, image_b)
+    for img_name_a in images_a:
+        for img_name_b in images_b:
+            image_path_a = os.path.join(submission_dir, img_name_a)
+            image_path_b = os.path.join(reference_dir, img_name_b)
 
-        image_a = skio.imread(image_path_a)
-        image_b = skio.imread(image_path_b)
+            image_a = skio.imread(image_path_a)
+            image_b = skio.imread(image_path_b)
 
-        # Zero pad if the images are different sizes
-        if image_a.shape != image_b.shape:
-            pad_x = max(image_a.shape[0], image_b.shape[0])
-            pad_y = max(image_a.shape[1], image_b.shape[1])
-            image_a = np.pad(image_a, ((0, pad_x - image_a.shape[0]), (0, pad_y - image_a.shape[1]), (0, 0)), mode='constant')
-            image_b = np.pad(image_b, ((0, pad_x - image_b.shape[0]), (0, pad_y - image_b.shape[1]), (0, 0)), mode='constant')
-        
-        # Remove alpha channel if it exists
-        if image_a.shape[2] == 4:
-            image_a = image_a[:, :, :3]
-        if image_b.shape[2] == 4:
-            image_b = image_b[:, :, :3]
+            # Zero pad if the images are different sizes
+            if image_a.shape != image_b.shape:
+                pad_x = max(image_a.shape[0], image_b.shape[0])
+                pad_y = max(image_a.shape[1], image_b.shape[1])
+                image_a = np.pad(image_a, ((0, pad_x - image_a.shape[0]), (0, pad_y - image_a.shape[1]), (0, 0)), mode='constant')
+                image_b = np.pad(image_b, ((0, pad_x - image_b.shape[0]), (0, pad_y - image_b.shape[1]), (0, 0)), mode='constant')
+            
+            # Remove alpha channel if it exists
+            if image_a.shape[2] == 4:
+                image_a = image_a[:, :, :3]
+            if image_b.shape[2] == 4:
+                image_b = image_b[:, :, :3]
 
-        # Compare the images
-        mse = np.mean((image_a - image_b) ** 2)
-        ssim_value = ssim(image_a, image_b, multichannel=True, win_size=11, channel_axis=2)
-        psnr_value = psnr(image_a, image_b)
+            # Compare the images
+            mse = np.mean((image_a - image_b) ** 2)
+            ssim_value = ssim(image_a, image_b, multichannel=True, win_size=11, channel_axis=2)
+            psnr_value = psnr(image_a, image_b)
 
-        mse_min = min(mse_min, mse)
-        mse_max = max(mse_max, mse)
-        mse_avg += mse
+            mse_min = min(mse_min, mse)
+            mse_max = max(mse_max, mse)
 
-        ssim_min = min(ssim_min, ssim_value)
-        ssim_max = max(ssim_max, ssim_value)
-        ssim_avg += ssim_value        
+            ssim_min = min(ssim_min, ssim_value)
+            ssim_max = max(ssim_max, ssim_value)
 
-        psnr_min = min(psnr_min, psnr_value)
-        psnr_max = max(psnr_max, psnr_value)
-        psnr_avg += psnr_value
+            psnr_min = min(psnr_min, psnr_value)
+            psnr_max = max(psnr_max, psnr_value)
+    
+    mse_values.append((mse_min, mse_max))
+    ssim_values.append((ssim_min, ssim_max))
+    psnr_values.append((psnr_min, psnr_max))
 
-    mse_avg /= len(images_a)
-    ssim_avg /= len(images_a)
-    psnr_avg /= len(images_a)
-
-    mse_values.append((mse_min, mse_max, mse_avg))
-    ssim_values.append((ssim_min, ssim_max, ssim_avg))
-    psnr_values.append((psnr_min, psnr_max, psnr_avg))
-
-    return submission_dir, reference_id, mse_values, ssim_values, psnr_values
+    return student_id, reference_id, mse_values, ssim_values, psnr_values
 
 
 def extract_image(doc_path: str, is_reference: bool = False):
