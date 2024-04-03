@@ -107,5 +107,8 @@ If you have any questions or need further assistance, please contact us at the f
 - Discussion Forum: [GitHub Discussions](https://github.com/metr0jw/Plagiarism-finder/discussions)
 
 ## Authors
-- **Jangsoo Park** - *Initial work* - [Jangsoo Park](https://github.com/jangsoopark), Department of Computer Engineering, Kwangwoon University
-- **Jiwoon Lee** - *Initial work* - [Jiwoon Lee](https://github.com/metr0jw), Department of Computer Engineering, Kwangwoon University
+- [**Jangsoo Park**](https://github.com/jangsoopark) - *Initial work*
+- [**Jiwoon Lee**](https://github.com/metr0jw) - *Initial work*
+- 
+## Thanks
+- [**Jihyeon Ha**](https://github.com/j2hxxx) - *Beta tester*

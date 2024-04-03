@@ -101,7 +101,7 @@ result/
 ## 기여를 환영합니다!
 기여를 환영합니다! 이슈, 기능 요청 또는 풀 리퀘스트를 제출해주세요. 개선 사항이나 새로운 기능에 대한 제안이 있으면 알려주세요.
 
-## Contact
+## 연락
 만약 궁금한 점이 있으시거나 추가적인 도움이 필요하시다면, 아래 연락처로 연락해주세요.
 - 이메일: [jwlee@linux.com](mailto:jwlee@linux.com)
 - 이슈 트래커: [GitHub Issues](https://github.com/metr0jw/Plagiarism-finder/issues)
@@ -114,5 +114,8 @@ email = "jwlee@linux.com"
 ```
 
 ## 저자
-- **박장수** - *초기 작업* - [박장수](https://github.com/jangsoopark), 광운대학교 컴퓨터공학과
-- **이지운** - *초기 작업* - [이지운](https://github.com/metr0jw), 광운대학교 컴퓨터공학과
+- [**박장수**](https://github.com/jangsoopark) - *초기 작업*
+- [**이지운**](https://github.com/metr0jw) - *초기 작업*
+
+## 도움 주신 분들
+- *[*하지현**](https://github.com/j2hxxx) - *베타 테스터*
