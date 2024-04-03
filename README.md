@@ -108,7 +108,7 @@ If you have any questions or need further assistance, please contact us at the f
 
 ## Authors
 - [**Jangsoo Park**](https://github.com/jangsoopark) - *Initial work*
-- [**Jiwoon Lee**](https://github.com/metr0jw) - *Initial work*
-- 
+- [**Jiwoon Lee**](https://github.com/metr0jw) - *Initial work*, *Maintainer*
+
 ## Thanks
 - [**Jihyeon Ha**](https://github.com/j2hxxx) - *Beta tester*
