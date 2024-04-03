@@ -115,7 +115,7 @@ email = "jwlee@linux.com"
 
 ## 저자
 - [**박장수**](https://github.com/jangsoopark) - *초기 작업*
-- [**이지운**](https://github.com/metr0jw) - *초기 작업*
+- [**이지운**](https://github.com/metr0jw) - *초기 작업*, *메인테이너*
 
 ## 도움 주신 분들
 - *[*하지현**](https://github.com/j2hxxx) - *베타 테스터*

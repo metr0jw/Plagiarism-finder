@@ -111,4 +111,4 @@ If you have any questions or need further assistance, please contact us at the f
 - [**Jiwoon Lee**](https://github.com/metr0jw) - *Initial work*, *Maintainer*
 
 ## Thanks
-- [**Jihyeon Ha**](https://github.com/j2hxxx) - *Beta tester*
+- [**Jihyun Ha**](https://github.com/j2hxxx) - *Beta tester*
