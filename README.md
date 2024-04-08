@@ -16,7 +16,7 @@ docx,pdf
 c, cpp, h, hpp, py, java, mat, m, cs, asm, js, v, vhd, vhdl, r
 ```
 - Text (Under development)
-```text
+```textNeurIPS
 txt, csv, json, xml, html, css, yml, yaml
 ```
 
@@ -93,6 +93,14 @@ result/
 ## Note
 - The program is currently under development and may not work properly.
 - This program is intended to be used as a tool to assist in the detection of plagiarism. It is not a substitute for human judgment, and it is not a guarantee of plagiarism. It is the responsibility of the user to verify the results and determine whether plagiarism has occurred. The authors of this program are not responsible for any consequences that may arise from the use of this program.
+
+## Todo
+- [ ] Improve image comparison efficiency
+    - [ ] Speed up image comparison by image compression
+    - [ ] Compute similarity using block matrix inner product
+- [ ] Implement document comparison
+- [ ] Implement code comparison
+- [ ] Implement text comparison
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
