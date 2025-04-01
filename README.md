@@ -16,7 +16,7 @@ docx,pdf
 c, cpp, h, hpp, py, java, mat, m, cs, asm, js, v, vhd, vhdl, r
 ```
 - Text (Under development)
-```textNeurIPS
+```text
 txt, csv, json, xml, html, css, yml, yaml
 ```
 
