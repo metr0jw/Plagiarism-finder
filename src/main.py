@@ -38,78 +38,70 @@ from tools.compare.image import extract_image, compare_image, compare_image_wrap
 args = config.get_config()
 database = common.DB()
 
-def main():
-    # Parse check_filetype into a list
-    check_filetype = args.check_filetype.split(',')
-
-    # Check supported file types
-    assert len(check_filetype) > 0, 'check_filetype must be specified'
-    assert check_filetype not in common.supported_types, f'Supported file types are {common.supported_types}. \
-        Check github.com/metr0jw/Plagiarism-finder to ask for support \
-        or add the file type to supported_doc_types, supported_code_types, supported_etc_types in src/common.py.'
-
-    # Select supported file types, ex) ['docx', 'pdf', 'c', 'cpp', 'h', 'hpp', 'py', 'java', ...]
-    check_doc_types = [t for t in check_filetype if t in common.supported_doc_types]     # ['docx', 'pdf']
-    check_code_types = [t for t in check_filetype if t in common.supported_code_types]   # ['c', 'cpp', ...]
-    check_etc_types = [t for t in check_filetype if t in common.supported_etc_types]     # ['txt', 'csv', ...]
-
-    # Set threshold values
-    shape_threshold = args.shape_threshold
-    error_threshold = args.error_threshold
-    os.makedirs(args.output_dir, exist_ok=True)
-
-    submission_count = 0    # Initialize submission count
-    reference_count = 0     # Initialize reference count
-
-    # TODO: functionize parse_filenames
-    ### Parse filenames and add to database ###
-    for root, dirs, files in os.walk(args.input_dir):
+def parse_filenames(directory, check_doc_types, check_code_types, check_etc_types, database, is_reference=False):
+    """
+    Parse filenames in the directory and add them to the database.
+    
+    Args:
+        directory (str): Directory path to scan for files
+        check_doc_types (list): List of document file extensions to check
+        check_code_types (list): List of code file extensions to check
+        check_etc_types (list): List of other file extensions to check
+        database (common.DB): Database to store the parsed files
+        is_reference (bool): Whether parsing reference files or submissions
+        
+    Returns:
+        int: Number of files parsed
+    """
+    file_count = 0
+    
+    for root, dirs, files in os.walk(directory):
         if len(files) > 0:
-            submission_count += len(files)
-            # Path name as student_id
-            student_id = os.path.basename(root)
-            student = common.Student()
-            student.set_id(student_id)
-            for f in files:
-                if f.endswith(tuple(check_doc_types)):          # Check if file extension is in check_doc_types
-                    student.add_doc_dir(os.path.join(root, f))
-                elif f.endswith(tuple(check_code_types)):       # Check if file extension is in check_code_types
-                    student.add_code_dir(os.path.join(root, f))
-                elif f.endswith(tuple(check_etc_types)):        # Check if file extension is in check_etc_types
-                    student.add_etc_dir(os.path.join(root, f))
-            database.add_student(student)
-    for root, dirs, files in os.walk(args.reference_dir):
-        if len(files) > 0:
-            reference_count += len(files)
-            # Path name as student_id
-            reference_id = os.path.basename(root)
-            reference = common.Reference()
-            reference.set_id(reference_id)
+            file_count += len(files)
+            # Path name as student_id or reference_id
+            entity_id = os.path.basename(root)
+            
+            if is_reference:
+                entity = common.Reference()
+            else:
+                entity = common.Student()
+                
+            entity.set_id(entity_id)
+            
             for f in files:
                 if f.endswith(tuple(check_doc_types)):
-                    reference.add_doc_dir(os.path.join(root, f))
+                    entity.add_doc_dir(os.path.join(root, f))
                 elif f.endswith(tuple(check_code_types)):
-                    reference.add_code_dir(os.path.join(root, f))
+                    entity.add_code_dir(os.path.join(root, f))
                 elif f.endswith(tuple(check_etc_types)):
-                    reference.add_etc_dir(os.path.join(root, f))
-            database.add_reference(reference)
-    # TODO_END
+                    entity.add_etc_dir(os.path.join(root, f))
+                    
+            if is_reference:
+                database.add_reference(entity)
+            else:
+                database.add_student(entity)
+                
+    return file_count
 
-    # Get student and reference directories
-    sub_doc_names, ref_doc_names = database.get_documents()
-
-    # Print information
-    print(f'Num submissions: {submission_count}')
-    print(f'References: {reference_count}')
-    print(f'Filetype to check: {check_filetype}')
-    print(f'I/O Directories: {args.input_dir}, {args.reference_dir}, {args.output_dir}')
-    print(f'Error Threshold: {error_threshold}')
-    print(f'Shape Threshold: {shape_threshold}')
-
-    # TODO: functionize compare_files
-    # Execute
+def compare_files(database, check_doc_types, check_code_types, check_etc_types, args):
+    """
+    Compare files based on their types and save results.
+    
+    Args:
+        database (common.DB): Database containing files to compare
+        check_doc_types (list): List of document file extensions to check
+        check_code_types (list): List of code file extensions to check
+        check_etc_types (list): List of other file extensions to check
+        args: Command line arguments
+        
+    Returns:
+        None
+    """
     # If check document
     if len(check_doc_types) > 0:
+        # Get student and reference directories
+        sub_doc_names, ref_doc_names = database.get_documents()
+        
         ### Extract images from document files ###
         print('Checking document files...')
         print('Extracting images...')
@@ -121,9 +113,10 @@ def main():
                 extract_image(s)
             for r in tqdm(ref_doc_names, desc='Extracting images... (Reference)'):
                 extract_image(r, is_reference=True)
-        # Get directoreis in buffer
-        sub_image_dirs = glob.glob(os.path.join(common.buffer_dir, '*'))        # ['student_id1', 'student_id2', ...] in absolute path
-        ref_image_dirs = glob.glob(os.path.join(common.buffer_dir, 'ref_*'))    # ['ref_student_id1', 'ref_student_id2', ...] in absolute path
+                
+        # Get directories in buffer
+        sub_image_dirs = glob.glob(os.path.join(common.buffer_dir, '*'))
+        ref_image_dirs = glob.glob(os.path.join(common.buffer_dir, 'ref_*'))
 
         # Remove ref_image_dirs from sub_image_dirs
         sub_image_dirs = [s for s in sub_image_dirs if s not in ref_image_dirs]
@@ -162,9 +155,9 @@ def main():
                 database.add_connection(*result, reference=True)
 
         # Save the result using pandas
-        buf = [[key, *value] for key, values in database.connections.items() for value in values]   # [['student_id_a', 'student_id_b', ['mse'], ['ssim'], ['psnr']], ...]
+        buf = [[key, *value] for key, values in database.connections.items() for value in values]
         # Unpack ssim, psnr, mse
-        buf = [[*b[:2], *b[2][0], *b[3][0], *b[4][0]] for b in buf]    # [['student_id_a', 'student_id_b', 'mse_min', 'mse_max', 'mse_avg', ], ...]
+        buf = [[*b[:2], *b[2][0], *b[3][0], *b[4][0]] for b in buf]
         df = pd.DataFrame(buf, columns=['student_id_a', 'student_id_b',
                                         'mse_min', 'mse_max', 'mse_avg',
                                         'ssim_min', 'ssim_max', 'ssim_avg',
@@ -173,19 +166,51 @@ def main():
             
         ### Compare texts in document files ###
 
-    
     # If check code
-    ### Compare code files ###
     if len(check_code_types) > 0:
         print('Checking code files...')
         code_result = []
     
     # If check etc
-    ### Compare etc files ###
     if len(check_etc_types) > 0:
         print('Checking etc files...')
         etc_result = []
-        
+
+def main():
+    # Parse check_filetype into a list
+    check_filetype = args.check_filetype.split(',')
+
+    # Check supported file types
+    assert len(check_filetype) > 0, 'check_filetype must be specified'
+    assert check_filetype not in common.supported_types, f'Supported file types are {common.supported_types}. \
+        Check github.com/metr0jw/Plagiarism-finder to ask for support \
+        or add the file type to supported_doc_types, supported_code_types, supported_etc_types in src/common.py.'
+
+    # Select supported file types, ex) ['docx', 'pdf', 'c', 'cpp', 'h', 'hpp', 'py', 'java', ...]
+    check_doc_types = [t for t in check_filetype if t in common.supported_doc_types]     # ['docx', 'pdf']
+    check_code_types = [t for t in check_filetype if t in common.supported_code_types]   # ['c', 'cpp', ...]
+    check_etc_types = [t for t in check_filetype if t in common.supported_etc_types]     # ['txt', 'csv', ...]
+
+    # Set threshold values
+    shape_threshold = args.shape_threshold
+    error_threshold = args.error_threshold
+    os.makedirs(args.output_dir, exist_ok=True)
+
+    # Parse filenames and add to database
+    submission_count = parse_filenames(args.input_dir, check_doc_types, check_code_types, check_etc_types, database)
+    reference_count = parse_filenames(args.reference_dir, check_doc_types, check_code_types, check_etc_types, database, is_reference=True)
+
+    # Print information
+    print(f'Num submissions: {submission_count}')
+    print(f'References: {reference_count}')
+    print(f'Filetype to check: {check_filetype}')
+    print(f'I/O Directories: {args.input_dir}, {args.reference_dir}, {args.output_dir}')
+    print(f'Error Threshold: {error_threshold}')
+    print(f'Shape Threshold: {shape_threshold}')
+
+    # Compare files
+    compare_files(database, check_doc_types, check_code_types, check_etc_types, args)
+
 
 '''
 def main():
