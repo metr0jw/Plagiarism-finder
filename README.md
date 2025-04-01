@@ -98,9 +98,10 @@ result/
 - [ ] Improve image comparison efficiency
     - [ ] Speed up image comparison by image compression
     - [ ] Compute similarity using block matrix inner product
-- [ ] Implement document comparison
+    - [*] Reduce disk I/O
+- [*] Implement document comparison
 - [ ] Implement code comparison
-- [ ] Implement text comparison
+- [*] Implement text comparison
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
